@@ -26,6 +26,8 @@ public class Main {
 
         String url = "https://www.osc.org.bo/index.php/es/?option=com_content&view=article&id=50&ID=";
 
+        int lastID = 4616;
+
         String fileName = "earthquakes_bolivia.csv";
 
         Path path = Paths.get(fileName);
@@ -34,7 +36,7 @@ public class Main {
 
         sb.append("id, title, magnitude, region, date, location, deep, distance_text, observations, in_charge, references\n");
 
-        for(int id=1; id<=4615; id++){
+        for(int id=1; id<=lastID; id++){
 
             Request request = new Request.Builder()
                     .url(url+id)
@@ -86,6 +88,9 @@ public class Main {
 
         for (Element row : rows) {
 
+            if(index>9){
+                break;
+            }
             Elements columns = row.select("td, th");
             switch (index) {
                 case 1:
