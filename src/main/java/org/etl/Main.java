@@ -8,9 +8,14 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.model.Configuration;
 
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.util.Properties;
 import java.io.IOException;
+
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,13 +27,31 @@ public class Main {
     }
 
     public void ETL(){
+
+        Configuration conf = loadProperties();
+
+        if(conf.isStageExtract()){
+            extractData(conf);
+        }
+
+        if(conf.isStageTransform()){
+            transformData(conf);
+        }
+
+        if(conf.isStageLoad()){
+            loadData(conf);
+        }
+
+    }
+
+    private void extractData(Configuration conf){
         OkHttpClient client = new OkHttpClient();
 
-        String url = "https://www.osc.org.bo/index.php/es/?option=com_content&view=article&id=50&ID=";
+        String url = conf.getSourceUrl();
 
-        int lastID = 4616;
+        int lastID = conf.getIdLast();
 
-        String fileName = "earthquakes_bolivia.csv";
+        String fileName = conf.getStageExtractFilename();
 
         Path path = Paths.get(fileName);
 
@@ -50,7 +73,7 @@ public class Main {
                     String htmlContent = response.body().string();
                     String dataRaw = getEarthquakeData(htmlContent, id);
                     System.out.println(dataRaw);
-                    sb.append(dataRaw+"\n");
+                    sb.append(dataRaw).append("\n");
                 } else {
                     System.out.println("GET request failed. Response Code: " + statusCode);
                 }
@@ -59,12 +82,20 @@ public class Main {
             }
         }
 
-        try (BufferedWriter writer = Files.newBufferedWriter(path)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
             writer.write(sb.toString()); // Write text to the file
             System.out.println("File written successfully.");
         } catch (IOException e) {
             System.err.println("An error occurred while writing to the file: " + e.getMessage());
         }
+    }
+
+    private void transformData(Configuration conf){
+
+    }
+
+    private void loadData(Configuration conf){
+
     }
 
     private String getEarthquakeData(String html, int id){
@@ -138,5 +169,31 @@ public class Main {
                 observations + ", " +
                 in_charge + ", " +
                 references;
+    }
+
+    private Configuration loadProperties(){
+        Properties properties = new Properties();
+        Configuration conf = new Configuration();
+
+        try (FileInputStream input = new FileInputStream("config.properties")) {
+            properties.load(input);
+
+            conf.setSourceUrl(properties.getProperty("source.url"));
+            conf.setIdLast(Integer.parseInt(properties.getProperty("id.last")));
+
+            conf.setStageExtract(Boolean.parseBoolean(properties.getProperty("stage.extract")));
+            conf.setStageExtractFilename(properties.getProperty("stage.extract.filename"));
+
+            conf.setStageTransform(Boolean.parseBoolean(properties.getProperty("stage.transform")));
+            conf.setStageTransformFilename(properties.getProperty("stage.transform.filename"));
+
+            conf.setStageLoad(Boolean.parseBoolean(properties.getProperty("stage.load")));
+            conf.setStageLoadFilename(properties.getProperty("stage.load.filename"));
+
+
+        } catch (IOException e) {
+            System.err.println("Error reading the configuration file: " + e.getMessage());
+        }
+        return conf;
     }
 }
