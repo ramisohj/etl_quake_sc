@@ -21,12 +21,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main (String[] args) {
         Main main =  new Main();
         main.ETL();
     }
 
-    public void ETL(){
+    public void ETL (){
 
         Configuration conf = loadProperties();
 
@@ -44,7 +44,7 @@ public class Main {
 
     }
 
-    private void extractData(Configuration conf){
+    private void extractData (Configuration conf){
         OkHttpClient client = new OkHttpClient();
 
         String url = conf.getSourceUrl();
@@ -59,7 +59,7 @@ public class Main {
 
         sb.append("id, title, magnitude, region, date, location, deep, distance_text, observations, in_charge, references\n");
 
-        for(int id=1; id<=lastID; id++){
+        for (int id=1; id<=lastID; id++){
 
             Request request = new Request.Builder()
                     .url(url+id)
@@ -82,7 +82,7 @@ public class Main {
             }
         }
 
-        try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_16)) {
             writer.write(sb.toString()); // Write text to the file
             System.out.println("File written successfully.");
         } catch (IOException e) {
@@ -91,6 +91,7 @@ public class Main {
     }
 
     private void transformData(Configuration conf){
+        // covert info in correct data
 
     }
 
