@@ -10,10 +10,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.model.Configuration;
 
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
+import java.io.*;
 import java.util.Properties;
-import java.io.IOException;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -78,7 +76,7 @@ public class Main {
                     System.out.println("GET request failed. Response Code: " + statusCode);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("An error occurred while writing to the file: " + e.getMessage());
             }
         }
 
@@ -91,8 +89,8 @@ public class Main {
     }
 
     private void transformData(Configuration conf){
-        // covert info in correct data
-
+        Transformer transformer = new Transformer();
+        transformer.transformData(conf);
     }
 
     private void loadData(Configuration conf){
