@@ -17,21 +17,20 @@ public class Transformer {
         String stageExtractFilePath = conf.getStageExtractFilename();
         String stageTransformFilePath = conf.getStageTransformFilename();
 
+        StringBuffer sb = new StringBuffer();
 
-        StringBuilder content = new StringBuilder();
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(stageExtractFilePath), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(stageExtractFilePath), StandardCharsets.UTF_16))) {
             String line;
             int index = 0;
             while ((line = br.readLine()) != null) {
                 System.out.println("LINE: " + line);
                 if (index == 0) {
-                    content.append("id, title, magnitude, region, date, location, deep, distance_text, observations, in_charge, references\n");
+                    sb.append("id, title, magnitude, region, date, location, deep, distance_text, observations, in_charge, references\n");
                 } else {
                     String[] ls = line.split(",");
 
                     //Check null or empty values
-                    if(!areValuesEmpty(ls)){
+                    if(!areEmptyValues(ls)){
                         String id = ls[Ecols.ID.ordinal()];
                         String title = ls[Ecols.TITLE.ordinal()].split("-", 2)[1];
                         String magnitude = getMagnitude(ls[Ecols.MAGNITUDE.ordinal()]);
@@ -58,13 +57,13 @@ public class Transformer {
 
 
                         System.out.println(dataRaw);
-                        content.append(dataRaw).append("\n");
+                        sb.append(dataRaw).append("\n");
                     }
                 }
                 index ++;
             }
             try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(stageTransformFilePath), StandardCharsets.UTF_16)) {
-                writer.write(content.toString());
+                writer.write(sb.toString());
                 System.out.println("File written successfully.");
             } catch (IOException e) {
                 System.err.println("An error occurred while writing to the file: " + e.getMessage());
@@ -75,7 +74,7 @@ public class Transformer {
         }
     }
 
-    private boolean areValuesEmpty(String[] ls){
+    private boolean areEmptyValues(String[] ls){
         return ls[(Ecols.TITLE.ordinal())].trim().equals("M -") ||
                 ls[Ecols.MAGNITUDE.ordinal()].trim().equals("M") ||
                 ls[Ecols.REGION.ordinal()].trim().isEmpty() ||
@@ -90,6 +89,7 @@ public class Transformer {
 
     private String getMagnitude(String str){
         String numberText = str.replace(";", ".");
+        numberText = numberText.replaceAll("[()]", "");
         numberText = numberText.replaceAll("[a-zA-Z]", "");
         numberText = numberText.replaceAll("\\s", "");
 
