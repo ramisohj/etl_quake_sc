@@ -1,6 +1,6 @@
 package org.model;
 
-public enum Ecols {
+public enum ExtractCols {
     ID,
     TITLE,
     MAGNITUDE,

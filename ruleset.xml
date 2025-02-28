@@ -1,0 +1,5 @@
+<ruleset name="Custom Ruleset">
+    <rule ref="category/java/bestpractices.xml"/>
+    <rule ref="category/java/codestyle.xml"/>
+    <!-- Add more rules as needed -->
+</ruleset>

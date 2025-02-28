@@ -47,4 +47,66 @@
 
     </dependencies>
 
+    <build>
+        <plugins>
+
+            <!-- Checkstyle -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <configLocation>/checkstyle.xml</configLocation>
+                    <failOnViolation>true</failOnViolation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- PMD -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.26.0</version>
+                <configuration>
+                    <rulesets>
+                        <ruleset>/rulesets/java/quickstart.xml</ruleset>
+                    </rulesets>
+                    <failOnViolation>true</failOnViolation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- SpotBugs -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.9.1.0</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <failOnError>true</failOnError>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

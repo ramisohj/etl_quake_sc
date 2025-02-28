@@ -1,7 +1,10 @@
 package org.etl;
 
 import org.model.Configuration;
-import org.model.Ecols;
+import org.model.ExtractCols;
+import org.model.TransCols;
+import org.util.CSV;
+import org.util.UtilNumber;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -16,48 +19,33 @@ public class Transformer {
 
         String stageExtractFilePath = conf.getStageExtractFilename();
         String stageTransformFilePath = conf.getStageTransformFilename();
-
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(stageExtractFilePath), StandardCharsets.UTF_16))) {
             String line;
             int index = 0;
             while ((line = br.readLine()) != null) {
-                System.out.println("LINE: " + line);
+                System.out.println(line);
                 if (index == 0) {
-                    sb.append("id, title, magnitude, region, date, location, deep, distance_text, observations, in_charge, references\n");
+                    sb.append(TransCols.getAllColsList());
                 } else {
                     String[] ls = line.split(",");
-
-                    //Check null or empty values
                     if(!areEmptyValues(ls)){
-                        String id = ls[Ecols.ID.ordinal()];
-                        String title = ls[Ecols.TITLE.ordinal()].split("-", 2)[1];
-                        String magnitude = getMagnitude(ls[Ecols.MAGNITUDE.ordinal()]);
-                        String region = ls[Ecols.REGION.ordinal()].replace(";", "-");
-                        String date = getDate(ls[Ecols.DATE.ordinal()]);
-                        String location = ls[Ecols.LOCATION.ordinal()];
-                        String deep = ls[Ecols.DEEP.ordinal()];
-                        String distance_text = ls[Ecols.DISTANCE_TEXT.ordinal()];
-                        String observations = ls[Ecols.OBSERVATIONS.ordinal()];
-                        String in_charge = ls[Ecols.IN_CHARGE.ordinal()];
-                        String references = ls[Ecols.REFERENCES.ordinal()];
-
-                        String dataRaw = id + ", " +
-                                title + ", " +
-                                magnitude + ", " +
-                                region + ", " +
-                                date + ", " +
-                                location + ", " +
-                                deep + ", " +
-                                distance_text + ", " +
-                                observations + ", " +
-                                in_charge + ", " +
-                                references;
-
-
-                        System.out.println(dataRaw);
-                        sb.append(dataRaw).append("\n");
+                        String dataRaw = CSV.buildLineCSV(
+                            ls[ExtractCols.ID.ordinal()],
+                            getTitle(ls[ExtractCols.TITLE.ordinal()]),
+                            getMagnitude(ls[ExtractCols.MAGNITUDE.ordinal()]),
+                            ls[ExtractCols.REGION.ordinal()].replace(";", "-"),
+                            getDate(ls[ExtractCols.DATE.ordinal()]),
+                            ls[ExtractCols.LOCATION.ordinal()].split(";")[0].trim(),
+                            ls[ExtractCols.LOCATION.ordinal()].split(";")[1].trim(),
+                            getDeep(ls[ExtractCols.DEEP.ordinal()]),
+                            ls[ExtractCols.DISTANCE_TEXT.ordinal()],
+                            ls[ExtractCols.OBSERVATIONS.ordinal()],
+                            ls[ExtractCols.IN_CHARGE.ordinal()],
+                            ls[ExtractCols.REFERENCES.ordinal()]
+                        );
+                        sb.append(dataRaw);
                     }
                 }
                 index ++;
@@ -74,40 +62,45 @@ public class Transformer {
         }
     }
 
-    private boolean areEmptyValues(String[] ls){
-        return ls[(Ecols.TITLE.ordinal())].trim().equals("M -") ||
-                ls[Ecols.MAGNITUDE.ordinal()].trim().equals("M") ||
-                ls[Ecols.REGION.ordinal()].trim().isEmpty() ||
-                ls[Ecols.DATE.ordinal()].trim().equals("(Hora local)") ||
-                ls[Ecols.LOCATION.ordinal()].trim().equals(";") ||
-                ls[Ecols.DEEP.ordinal()].trim().equals("km");
-//                ls[Ecols.DISTANCE_TEXT.ordinal()].trim().isEmpty() ||
-//                ls[Ecols.OBSERVATIONS.ordinal()].trim().isEmpty() ||
-//                ls[Ecols.IN_CHARGE.ordinal()].trim().isEmpty() ||
-//                ls[Ecols.REFERENCES.ordinal()].trim().isEmpty();
+    private boolean areEmptyValues(String[] values){
+        return values[(ExtractCols.TITLE.ordinal())].trim().equals("M -") ||
+                values[ExtractCols.MAGNITUDE.ordinal()].trim().equals("M") ||
+                values[ExtractCols.REGION.ordinal()].trim().isEmpty() ||
+                values[ExtractCols.DATE.ordinal()].trim().equals("(Hora local)") ||
+                values[ExtractCols.LOCATION.ordinal()].trim().equals(";") ||
+                values[ExtractCols.DEEP.ordinal()].trim().equals("km");
     }
 
-    private String getMagnitude(String str){
-        String numberText = str.replace(";", ".");
-        numberText = numberText.replaceAll("[()]", "");
-        numberText = numberText.replaceAll("[a-zA-Z]", "");
-        numberText = numberText.replaceAll("\\s", "");
-
-        Pattern pattern = Pattern.compile("\\d+\\.\\d+");
-        Matcher matcher = pattern.matcher(numberText);
-
-        if (matcher.find()) {
-            numberText = matcher.group();
-        }
-
-        return numberText.trim();
+    private String getTitle(String title) {
+        title = title.split("-", 2)[1];
+        title = title.replace(";", "-");
+        return title;
     }
 
-    private String getDate(String str) {
-        String date = str.trim();
+    private String getMagnitude(String magnitude){
+        return UtilNumber.getDecimalNumber(magnitude);
+    }
+
+    private String getDate(String date) {
+        date = date.trim();
         date = date.replace("(Hora local)", "");
         date = date.trim();
         return date;
     }
 
+    private String getDeep(String deep) {
+        String formatedDeep = deep;
+        if(deep.matches(".*\\d+.*")){
+            formatedDeep = UtilNumber.getDecimalNumber(deep);
+        }else{
+            if(deep.toLowerCase().contains("supe")){
+                formatedDeep = "35"; // shallow range (0 - 70 km), avg=35 km
+            } else if (deep.toLowerCase().contains("intermedi")) {
+                formatedDeep = "185"; //intermediate range (70 - 300 km), avg=115 km
+            } else if (deep.toLowerCase().contains("profundo")) {
+                formatedDeep = "500"; //intermediate range (300 - 700 km), avg=115 km
+            }
+        }
+        return formatedDeep;
+    }
 }
