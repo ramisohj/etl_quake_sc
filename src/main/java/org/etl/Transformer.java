@@ -10,8 +10,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Transformer {
 
@@ -58,7 +56,7 @@ public class Transformer {
             }
 
         } catch (IOException e) {
-            System.err.println("An error occurred while writing to the file: " + e.getMessage());
+            System.err.println("An error occurred while reading the file: " + e.getMessage());
         }
     }
 
@@ -82,7 +80,6 @@ public class Transformer {
     }
 
     private String getDate(String date) {
-        date = date.trim();
         date = date.replace("(Hora local)", "");
         date = date.trim();
         return date;
