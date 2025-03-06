@@ -2,10 +2,18 @@ package org.util;
 
 import java.sql.*;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 public class PsqlConnector {
     public static void main(String[] args) throws ClassNotFoundException {
+
+        Dotenv dotenv = Dotenv.load();
         try (final Connection connection =
-                     DriverManager.getConnection("jdbc:postgresql://postgis-ramisohj.f.aivencloud.com:26882/defaultdb?ssl=require&user=user_name&password=pass_here");
+                     DriverManager.getConnection("jdbc:postgresql://postgis-ramisohj.f.aivencloud.com:26882" +
+                             "/defaultdb" +
+                             "?ssl=require" +
+                             "&user=" + dotenv.get("DB_USERNAME")+
+                             "&password=" + dotenv.get("DB_PASSWORD"));
              final Statement statement = connection.createStatement();
              final ResultSet resultSet = statement.executeQuery("SELECT * FROM bol_adm3")) {
 

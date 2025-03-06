@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.util.GeoUtil.getPoint;
+
 public class Transformer {
 
     public void transformData(Configuration conf){
@@ -35,8 +37,7 @@ public class Transformer {
                             getMagnitude(ls[ExtractCols.MAGNITUDE.ordinal()]),
                             ls[ExtractCols.REGION.ordinal()].replace(";", "-"),
                             getDate(ls[ExtractCols.DATE.ordinal()]),
-                            ls[ExtractCols.LOCATION.ordinal()].split(";")[0].trim(),
-                            ls[ExtractCols.LOCATION.ordinal()].split(";")[1].trim(),
+                            getLocation(ls[ExtractCols.LOCATION.ordinal()]),
                             getDeep(ls[ExtractCols.DEEP.ordinal()]),
                             ls[ExtractCols.DISTANCE_TEXT.ordinal()],
                             ls[ExtractCols.OBSERVATIONS.ordinal()],
@@ -99,5 +100,12 @@ public class Transformer {
             }
         }
         return formatedDeep;
+    }
+
+    private String getLocation(String location) {
+        String latitude = location.split(";")[0].trim();
+        String longitude = location.split(";")[1].trim();
+
+        return getPoint(longitude, latitude).toString();
     }
 }
