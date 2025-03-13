@@ -4,7 +4,7 @@ import org.model.Configuration;
 import org.model.ExtractCols;
 import org.model.TransCols;
 import org.util.CSV;
-import org.util.UtilNumber;
+import org.util.NumberUtil;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -77,7 +77,7 @@ public class Transformer {
     }
 
     private String getMagnitude(String magnitude){
-        return UtilNumber.getDecimalNumber(magnitude);
+        return NumberUtil.getDecimalText(magnitude);
     }
 
     private String getDate(String date) {
@@ -89,7 +89,7 @@ public class Transformer {
     private String getDeep(String deep) {
         String formatedDeep = deep;
         if(deep.matches(".*\\d+.*")){
-            formatedDeep = UtilNumber.getDecimalNumber(deep);
+            formatedDeep = NumberUtil.getDecimalText(deep);
         }else{
             if(deep.toLowerCase().contains("supe")){
                 formatedDeep = "35"; // shallow range (0 - 70 km), avg=35 km

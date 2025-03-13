@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Data;
 
 
 @AllArgsConstructor
@@ -24,4 +23,7 @@ public class Configuration {
 
     private boolean stageLoad;
     private String stageLoadFilename;
+
+    private boolean stageLoadGeo;
+    private String stageLoadGeoFilename;
 }

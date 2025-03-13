@@ -27,6 +27,8 @@ public class Config {
             conf.setStageLoad(Boolean.parseBoolean(properties.getProperty("stage.load")));
             conf.setStageLoadFilename(properties.getProperty("stage.load.filename"));
 
+            conf.setStageLoadGeo(Boolean.parseBoolean(properties.getProperty("stage.load.geo")));
+            conf.setStageLoadGeoFilename(properties.getProperty("stage.load.geo.filename"));
 
         } catch (IOException e) {
             System.err.println("Error reading the configuration file: " + e.getMessage());

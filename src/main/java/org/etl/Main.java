@@ -25,6 +25,9 @@ public class Main {
             loadData(conf);
         }
 
+        if(conf.isStageLoadGeo()){
+            loadGeojson(conf);
+        }
     }
 
     private void extractData(Configuration conf){
@@ -39,5 +42,10 @@ public class Main {
 
     private void loadData(Configuration conf){
 
+    }
+
+    private void loadGeojson(Configuration conf){
+        LoaderGeojson loaderGeojson = new LoaderGeojson();
+        loaderGeojson.loadGeojson(conf);
     }
 }
